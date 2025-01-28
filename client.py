@@ -1,16 +1,27 @@
 import socket
-from time import sleep
 
-sock = socket.socket()
-sock.setblocking(1)
-sock.connect(('10.38.165.12', 9090))
+def start_client(host='127.0.0.1', port=65432):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-#msg = input()
-msg = "Hi!"
-sock.send(msg.encode())
+    try:
+        client_socket.connect((host, port))
+        print("Соединение с сервером установлено")
 
-data = sock.recv(1024)
+        while True:
+            message = input("Введите сообщение для отправки серверу ('exit' для выхода) ")
+            if message.lower() == 'exit':
+                break
 
-sock.close()
+            client_socket.sendall(message.encode())
+            print("Сообщение отправлено серверу", message)
 
-print(data.decode())
+            data = client_socket.recv(1024)
+            print("Сообщение получено от сервера", data.decode())
+
+    except ConnectionError:
+        print("Ошибка соединения с сервером")
+    finally:
+        client_socket.close()
+        print("Соединение с сервером разорвано")
+
+start_client()
